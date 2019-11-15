@@ -1,5 +1,6 @@
 import express from 'express';
 import pg from 'pg';
+import { reverse } from 'dns';
 
 const Client = pg.Client;
 
@@ -22,15 +23,17 @@ app.get(`/${apiPrefix}`, async (req, res) => {
         await client.connect();
 
         client
-            .query("SELECT NOW()")
+            .query("SELECT * FROM todos")
             .then(res => console.log(res.rows))
-            .catch(e => console.error(e.stack));
+            .catch(e => console.error(e));
+
 
         await client.end()
     } catch(err) {
         console.error(err);
     };
 });
+
 
 // Returns single todo
 app.get(`/${apiPrefix}/:id`);
