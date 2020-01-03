@@ -14,7 +14,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-router": "0.0.1",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "toml": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",

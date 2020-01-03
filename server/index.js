@@ -1,52 +1,48 @@
 import express from 'express';
 import pg from 'pg';
+import toml from 'toml';
+import fs from 'fs';
 import { reverse } from 'dns';
 
-const Client = pg.Client;
-
 const app = express();
-const port = 3000;
+const serverPort = 3000;
 
-const apiPrefix = "todoodles";
+const config = toml.parse(fs.readFileSync('../config/dev.toml', 'utf-8'));
 
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'toodledoodledoo',
-    password: 'docker',
-    port: 5432,
+const  {
+    database,
+    user,
+    port,
+    password,
+    host,
+} = config.database;
+
+const apiPrefix = "toodoodles";
+
+const pool = new pg.Pool({
+    user, 
+    host, 
+    database, 
+    password,
+    port,
 });
 
 // Returns all todos
 app.get(`/${apiPrefix}`, async (req, res) => {
-    try {
-        await client.connect();
-
-        client
-            .query("SELECT * FROM todos")
-            .then(res => console.log(res.rows))
-            .catch(e => console.error(e));
-
-
-        await client.end()
-    } catch(err) {
-        console.error(err);
-    };
+    res.send("hello")
 });
 
+app.post("/make-new-todo", (req, res) => {
+  const { name } = req.body
 
-// Returns single todo
-app.get(`/${apiPrefix}/:id`);
+  pool.query('INSERT INTO todos (name, email) VALUES ($1, $2)', [name, email], (error, results) => {
+    if (error) {
+      throw error
+    }
+    response.status(201).send(`User added with ID: ${result.insertId}`)
+  })
+})
 
-// Creates single todo
-app.post(`/${apiPrefix}`);
-
-// Updates single todo
-app.put(`/${apiPrefix}/:id`);
-
-// Deletes single todo
-app.delete(`${apiPrefix}/:id`);
-
-
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
+app.post(`/${apiPrefix}`, async (req, res) => {
+    res.send("hello")
+});
