@@ -1,52 +1,112 @@
 import express from 'express';
 import pg from 'pg';
+import toml from 'toml';
+import fs from 'fs';
+import { doesFileExist } from '../utils'
+import bodyParser from 'body-parser';
 import { reverse } from 'dns';
 
-const Client = pg.Client;
+
+const config = doesFileExist('../config/dev.toml')
+  ? toml.parse(fs.readFileSync('../config/dev.toml', 'utf-8'))
+  : toml.parse(fs.readFileSync('../config/default.toml', 'utf-8'));
 
 const app = express();
-const port = 3000;
+const serverPort = config.server.port;
+const apiPrefix = "api";
 
-const apiPrefix = "todoodles";
+const pool = new pg.Pool(config.database);
 
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'toodledoodledoo',
-    password: 'docker',
-    port: 5432,
-});
+// Middleware
+app.use(bodyParser.json());
 
 // Returns all todos
-app.get(`/${apiPrefix}`, async (req, res) => {
-    try {
-        await client.connect();
+app.get('/', (_, res) => {
 
-        client
-            .query("SELECT * FROM todos")
-            .then(res => console.log(res.rows))
-            .catch(e => console.error(e));
+  res.status(200).json({ "hello": "world" });
+});
 
+/**
+ * GET all TODOs. 
+ */
 
-        await client.end()
-    } catch(err) {
-        console.error(err);
-    };
+app.get(`/${apiPrefix}/todos`, async (req, res) => {
+  pool.query('SELECT * FROM todos', (err, result) => {
+    if (err) {
+      throw err;
+    }
+
+    console.log(result.rows);
+    res.status(200).json(result.rows);
+  });
+});
+
+/**
+ * GET a specific todo by ID.
+ */
+
+app.get(`/${apiPrefix}/todos/:id`, async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!isNaN(id) && id > 0) {
+    pool.query('SELECT * FROM todos WHERE id = $1', [id], (err, result) => {
+      if (err) {
+        throw err;
+      }
+
+      console.log(result.rows);
+      res.status(200).json(result.rows);
+    });
+  }
+});
+
+/**
+ * INSERT new Todoodledoo into database.
+ */
+
+app.post(`/${apiPrefix}/todos`, (req, res) => {
+  let name;
+
+  if (req && req.body && req.body.name) {
+    name = req.body.name;
+    console.log(name);
+  }
+
+  pool.query('INSERT INTO todos (name, completed) VALUES ($1, $2)', [name, false], (err, result) => {
+
+    if (err) {
+      console.log("Uh oH!", err);
+    } else {
+      console.log("Success", result);
+    }
+
+  })
+  // pool.query('INSERT INTO todos (name, completed) VALUES ($1, $2)', [name, completed], (error, results) => {
+  //   if (error) {
+  //     throw error
+  //   }
+  //   response.status(201).send(`User added with ID: ${result.insertId}`)
 });
 
 
-// Returns single todo
-app.get(`/${apiPrefix}/:id`);
 
-// Creates single todo
-app.post(`/${apiPrefix}`);
+app.delete(`/${apiPrefix}/todos/:id`, async (req, res) => {
 
-// Updates single todo
-app.put(`/${apiPrefix}/:id`);
+  const id = Number(req.params.id);
 
-// Deletes single todo
-app.delete(`${apiPrefix}/:id`);
+  if (!isNaN(id) && id > 0) {
+    pool.query('DELETE FROM todos WHERE id = $1;', [id], (err, result) => {
+      if (err) {
+        console.log("Uh oH!", err);
+      } else {
+        console.log("Success", result);
+      }
+    })
+  }
+});
 
-
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
+app.listen(serverPort, () => {
+  console.log(`
+    Hello! The server is running!
+  `);
+});
