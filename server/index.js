@@ -2,10 +2,14 @@ import express from 'express';
 import pg from 'pg';
 import toml from 'toml';
 import fs from 'fs';
+import { doesFileExist } from '../utils'
 import bodyParser from 'body-parser';
 import { reverse } from 'dns';
 
-const config = toml.parse(fs.readFileSync('../config/dev.toml', 'utf-8'));
+
+const config = doesFileExist('../config/dev.toml')
+  ? toml.parse(fs.readFileSync('../config/dev.toml', 'utf-8'))
+  : toml.parse(fs.readFileSync('../config/default.toml', 'utf-8'));
 
 const app = express();
 const serverPort = config.server.port;
@@ -34,7 +38,7 @@ app.get(`/${apiPrefix}/todos`, async (req, res) => {
 
     console.log(result.rows);
     res.status(200).json(result.rows);
-  });   
+  });
 });
 
 /**
@@ -52,7 +56,7 @@ app.get(`/${apiPrefix}/todos/:id`, async (req, res) => {
 
       console.log(result.rows);
       res.status(200).json(result.rows);
-    });   
+    });
   }
 });
 
@@ -75,8 +79,8 @@ app.post(`/${apiPrefix}/todos`, (req, res) => {
     } else {
       console.log("Success", result);
     }
-    
-  }) 
+
+  })
   // pool.query('INSERT INTO todos (name, completed) VALUES ($1, $2)', [name, completed], (error, results) => {
   //   if (error) {
   //     throw error

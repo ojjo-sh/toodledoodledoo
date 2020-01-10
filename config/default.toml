@@ -1,8 +1,10 @@
-[default]
-    db = "toodledoodledoo"
-    db_user = "posttgres"
-    db_host = "localhost"
-    db_port = 5432
-    db_password = docker
+[database]
+database = "todo"
+user = "postgres"
+host = "localhost"
+port = 5432
+password = "docker"
 
+[server]
+port = 1337
 
