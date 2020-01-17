@@ -1,9 +1,0 @@
-[database]
-database = "todo"
-user = "postgres"
-host = "localhost"
-port = 5432
-password = "docker"
-
-[server]
-port = 1337
