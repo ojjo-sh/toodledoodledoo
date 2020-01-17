@@ -1,0 +1,5 @@
+CREATE TABLE todos(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    completed BOOL NOT NULL DEFAULT FALSE    
+);

@@ -1,0 +1,1 @@
+INSERT INTO todo (name) VALUES ('Test todo 1');
