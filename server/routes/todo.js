@@ -10,15 +10,14 @@ export default function (router) {
      */
     router.get("/todos", async (req, res) => {
 
-        const selectAllCommand = "SELECT * FROM todos";
+        const query = "SELECT * FROM todos";
 
         try {
-            const result = await pool.query(selectAllCommand);
-            console.log(result.rows);
+            const result = await pool.query(query);
             res.status(200).json(result.rows);
         } catch (error) {
-            console.log(error);
-            return res.status(400).send("Error getting all todos");
+            console.log("Error returning all todos: ", error);
+            return res.status(400).send("Error getting all todos.");
         }
     });
 
@@ -32,18 +31,17 @@ export default function (router) {
 
         if (!isNaN(id) && id > 0) {
 
-            const selectIdCommand = "SELECT * FROM todos WHERE id = $1";
+            const query = "SELECT * FROM todos WHERE id = $1";
 
             try {
-                const result = await pool.query(selectIdCommand, [id]);
-                console.log(result.rows);
+                const result = await pool.query(query, [id]);
                 res.status(200).json(result.rows);
             } catch (error) {
-                console.log(error);
-                return res.status(400).send("Error getting todo.");
+                console.log(`Error returning todo of ID ${id}: `, error);
+                return res.status(400).send(`Error returning todo of ID ${id}`);
             }
         } else {
-            res.status(400).send("ID was either not a number, or negative.");
+            res.status(400).send(`Error returning todo of ID ${id}. Either NaN or negative.`);
         }
     });
 
@@ -60,20 +58,19 @@ export default function (router) {
         if (req && req.body && req.body.name) {
             name = req.body.name;
         } else {
-            return res.status(400).send("Name was null.");
+            return res.status(400).send("Error creating todo. Name was null.");
         }
 
         // Insert command
-        const insertCommand = "INSERT INTO todos (name, completed) VALUES ($1, $2)";
+        const query = "INSERT INTO todos (name, completed) VALUES ($1, $2)";
 
         // Do database insertion.
         try {
-            const result = await pool.query(insertCommand, [name, false]);
-            console.log("Successfully added a new todo!", result);
-            return res.status(200).send("Created todo");
+            const result = await pool.query(query, [name, false]);
+            return res.status(200).send(`Sucessfully created todo "${name}"`);
         } catch (error) {
-            console.log(error);
-            return res.status(400).send("Error creating todo");
+            console.log("Error creating todo: ", error);
+            return res.status(400).send(`Error creating todo "${name}"`);
         }
     });
 
@@ -86,17 +83,17 @@ export default function (router) {
 
         if (!isNaN(id) && id > 0) {
 
-            const deleteCommand = "DELETE FROM todos WHERE id = $1;";
+            const query = "DELETE FROM todos WHERE id = $1;";
 
             try {
-                const result = await pool.query(deleteCommand, [id]);
-                console.log("Sucessfully deleted todo!", result);
+                const result = await pool.query(query, [id]);
+                return res.status(200).send(`Sucessfully deleted todo of ID ${id}`);
             } catch (error) {
-                console.log(error);
-                return res.status(400).send("Error deleting todo.");
+                console.log(`Error deleting todo of ID ${id}`, error);
+                return res.status(400).send(`Error deleting todo of ID ${id}`);
             }
         } else {
-            return res.status(400).send("Error deleting todo. ID is NaN or negative.");
+            return res.status(400).send(`Error deleting todo of ID ${id}. Either NaN or negative.`);
         }
     });
 }
