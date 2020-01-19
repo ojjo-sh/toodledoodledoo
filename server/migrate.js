@@ -6,12 +6,14 @@ import config from "./config";
 const directory = path.join(__dirname, "/migrations");
 const files = fs.readdirSync(directory).sort();
 
-async function query(queries, pool) {
-    if (!queries || !Array.isArray(queries) || !pool) return false;
-
-    let client;
-
+async function query(queries, pool, file) {
     return new Promise(async (resolve, reject) => {
+        if (!queries || !Array.isArray(queries)) {
+            throw new Error(`Queries invalid for ${file ? file : "migration"}.`)
+        }
+
+        let client;
+
         try {
             for (const q of queries) {
                 client = await pool.connect();
@@ -47,7 +49,7 @@ async function query(queries, pool) {
                 database
             });
 
-            await query(queries, pool);
+            await query(queries, pool, files[i]);
             await pool.end();
         }
         console.log("Migration complete!");
