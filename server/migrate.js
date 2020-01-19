@@ -6,6 +6,33 @@ import config from "./config";
 const directory = path.join(__dirname, "/migrations");
 const files = fs.readdirSync(directory).sort();
 
+async function query(queries, pool) {
+    if (!queries || !Array.isArray(queries) || !pool) return false;
+
+    let client;
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            for (const q of queries) {
+                client = await pool.connect();
+                await client.query(q.trim());
+                client.release();
+            }
+
+            resolve(true);
+        } catch (err) {
+            if (
+                client
+                && typeof client.release === 'function'
+            ) {
+                client.release();
+            }
+
+            reject(err);
+        }
+    });
+}
+
 ;(async function() {
     try {
         console.log("Migrating...........");
@@ -20,16 +47,7 @@ const files = fs.readdirSync(directory).sort();
                 database
             });
 
-            for (const q of queries) {
-                try {
-                    const client = await pool.connect();
-                    await client.query(q.trim());
-                    client.release();
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-
+            await query(queries, pool);
             await pool.end();
         }
         console.log("Migration complete!");
