@@ -25,7 +25,7 @@ async function query(queries, pool, file) {
         } catch (err) {
             if (
                 client
-                && typeof client.release === 'function'
+                && typeof client.release === "function"
             ) {
                 client.release();
             }
