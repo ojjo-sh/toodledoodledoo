@@ -1,5 +1,7 @@
+import config from "../config";
+
 export default {
-    database: "toodledoodledoo",
+    database: config.database.database || "toodledoodledoo",
     queries: [
         `CREATE TABLE todos(
             id SERIAL PRIMARY KEY,

@@ -19,7 +19,7 @@ $ npm i
 ```bash
 $ npm run migrate
 ```
-__NOTE:__ If the above command fails, before posting an issue, sanity check yourself. Make sure Postgres is running and your `dev.toml` is configured correctly. 
+__NOTE:__ If the above command fails, before posting an issue, sanity check yourself. Make sure Postgres is running and your `dev.toml` is configured correctly. The script should also be indempotent, so don't worry about running it again. 
 
 
 3) You can finally start the dev server by running:
