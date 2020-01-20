@@ -19,6 +19,7 @@ Once installed, you will need to run migrations:
 ```bash
 $ npm run migrate
 ```
+__NOTE:__ Before posting an issue, sanity check yourself. Make sure Postgres is running and your `dev.toml` is configured correctly. 
 
 You can finally start the dev server by running:
 ```bash
