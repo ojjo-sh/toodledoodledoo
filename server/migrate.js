@@ -38,20 +38,42 @@ async function query(queries, pool, file) {
 ;(async function() {
     try {
         console.log("Migrating...........");
+
+        let previous, pool;
         for (let i = 0; i < files.length; i++) {
+            const migration = require(`./migrations/${files[i]}`).default;
+
+            if (!migration) {
+                throw new Error(`Error parsing migration: ${files[i]}`);
+            }
+
             const {
                 queries,
-                database,
-            } = require(`./migrations/${files[i]}`).default;
-
-            const pool = new pg.Pool({
-                ...config.database,
                 database
-            });
+            } = migration;
+
+            if (
+                !previous
+                || !previous.database
+                || database !== previous.database
+            ) {
+                if (pool) await pool.end();
+
+                pool = new pg.Pool({
+                    ...config.database,
+                    database
+                });
+            }
 
             await query(queries, pool, files[i]);
-            await pool.end();
+
+            if ( i === files.length - 1) {
+                await pool.end();
+            } else {
+                previous = migration;
+            }
         }
+
         console.log("Migration complete!");
     } catch(err) {
         console.error(err);
