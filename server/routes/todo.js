@@ -58,6 +58,7 @@ export default function (router) {
         if (req && req.body && req.body.name) {
             name = req.body.name;
         } else {
+            console.log(`Error with request body: ${JSON.stringify(req.body)}`);
             return res.status(400).send("Error creating todo. Name was null.");
         }
 
@@ -67,6 +68,8 @@ export default function (router) {
         // Do database insertion.
         try {
             const result = await pool.query(query, [name, false]);
+
+            console.log(`Created todo: ${name}`);
             return res.status(200).send(`Sucessfully created todo "${name}"`);
         } catch (error) {
             console.log("Error creating todo: ", error);
@@ -87,12 +90,14 @@ export default function (router) {
 
             try {
                 const result = await pool.query(query, [id]);
+                console.log(`Deleted todo: ${id}`);
                 return res.status(200).send(`Sucessfully deleted todo of ID ${id}`);
             } catch (error) {
                 console.log(`Error deleting todo of ID ${id}`, error);
                 return res.status(400).send(`Error deleting todo of ID ${id}`);
             }
         } else {
+            console.log(`Error deleting todo of ID ${id}. Either NaN, or an invalid number (0 or negative)`)
             return res.status(400).send(`Error deleting todo of ID ${id}. Either NaN or negative.`);
         }
     });
