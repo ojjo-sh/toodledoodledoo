@@ -1,2 +1,6 @@
 node_modules
 config/dev.toml
+dev.toml
+.log
+nohup.out
+
