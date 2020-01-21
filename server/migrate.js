@@ -43,18 +43,14 @@ async function query(queries, pool, file) {
         for (let i = 0; i < files.length; i++) {
             const migration = require(`./migrations/${files[i]}`).default;
 
-            if (!migration) {
+            if (!migration || !migration.database || !migration.queries) {
                 throw new Error(`Error parsing migration: ${files[i]}`);
             }
 
-            const {
-                queries,
-                database
-            } = migration;
+            const { queries, database } = migration;
 
             if (
                 !previous
-                || !previous.database
                 || database !== previous.database
             ) {
                 if (pool) await pool.end();
