@@ -35,10 +35,15 @@ export default function (router) {
 
             try {
                 const result = await pool.query(query, [id]);
-                res.status(200).json(result.rows);
+                if (Array.isArray(result.rows) && result.rows.length !== 0 && result.rows[0].id === id) {
+                    res.status(200).json(result.rows);
+                } else {
+                    throw `Todo with id ${id} does not exist`
+                }
             } catch (error) {
                 console.log(`Error returning todo of ID ${id}: `, error);
-                return res.status(400).send(`Error returning todo of ID ${id}`);
+                return res.status(400).send(`Error returning todo of ID ${id}: ${error}`);
+                
             }
         } else {
             res.status(400).send(`Error returning todo of ID ${id}. Either NaN or negative.`);
@@ -90,6 +95,7 @@ export default function (router) {
 
             try {
                 const result = await pool.query(query, [id]);
+                
                 console.log(`Deleted todo: ${id}`);
                 return res.status(200).send(`Sucessfully deleted todo of ID ${id}`);
             } catch (error) {
