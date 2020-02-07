@@ -1,7 +1,4 @@
-import pg from "pg";
-import config from "../config";
-
-const pool = new pg.Pool(config.database);
+import db from "../db";
 
 export default function(router) {
   /**
@@ -11,7 +8,7 @@ export default function(router) {
     const query = "SELECT * FROM todos";
 
     try {
-      const result = await pool.query(query);
+      const result = await db.query(query);
       res.status(200).json(result.rows);
     } catch (error) {
       console.log("Error returning all todos: ", error);
@@ -29,7 +26,7 @@ export default function(router) {
       const query = "SELECT * FROM todos WHERE id = $1";
 
       try {
-        const result = await pool.query(query, [id]);
+        const result = await db.query(query, [id]);
         if (
           Array.isArray(result.rows) &&
           result.rows.length !== 0 &&
@@ -73,7 +70,7 @@ export default function(router) {
 
     // Do database insertion.
     try {
-      const result = await pool.query(query, [name, false]);
+      const result = await db.query(query, [name, false]);
 
       console.log(`Created todo: ${name}`);
       return res.status(200).send(`Sucessfully created todo "${name}"`);
@@ -90,14 +87,14 @@ export default function(router) {
     //   Force TODO ID to be a number
     const id = Number(req.params.id);
 
-    // Define GET and DELETE queries for pool
+    // Define GET and DELETE queries for db
     const getTodoQuery = "SELECT * FROM todos WHERE id = $1";
     const deleteQuery = "DELETE FROM todos WHERE id = $1";
 
     if (!isNaN(id) && id > 0) {
       try {
         // The result from the GET TODO by ID request
-        const getTodoResult = await pool.query(getTodoQuery, [id]);
+        const getTodoResult = await db.query(getTodoQuery, [id]);
 
         // If the TODO doesn't exist, we won't get any results (empty row)
         if (
@@ -113,7 +110,7 @@ export default function(router) {
             .send(`Error deleting todo of ID ${id}. It doesn't exist!`);
         } else {
           //Else, the TODO exists and we can try and delete it
-          await pool.query(deleteQuery, [id]);
+          await db.query(deleteQuery, [id]);
           console.log(`Deleted todo: ${id}`);
           return res.status(200).send(`Sucessfully deleted todo of ID ${id}`);
         }
