@@ -22,7 +22,6 @@ export default function(router) {
   /**
    * Returns a todo from the database by ID.
    */
-
   router.get(`/todos/:id`, async (req, res) => {
     const id = Number(req.params.id);
 
@@ -88,7 +87,10 @@ export default function(router) {
    * Deletes a todo from the database by ID.
    */
   router.delete(`/todos/:id`, async (req, res) => {
+    //   Force TODO ID to be a number
     const id = Number(req.params.id);
+
+    // Define GET and DELETE queries for pool
     const getTodoQuery = "SELECT * FROM todos WHERE id = $1";
     const deleteQuery = "DELETE FROM todos WHERE id = $1";
 
@@ -109,20 +111,19 @@ export default function(router) {
           return res
             .status(400)
             .send(`Error deleting todo of ID ${id}. It doesn't exist!`);
-
-          //Else, the TODO exists and we can try and delete it
         } else {
-          const result = await pool.query(deleteQuery, [id]);
+          //Else, the TODO exists and we can try and delete it
+          await pool.query(deleteQuery, [id]);
           console.log(`Deleted todo: ${id}`);
           return res.status(200).send(`Sucessfully deleted todo of ID ${id}`);
         }
-        // Deleting the TODO didn't work... Report back the error.
       } catch (error) {
+        // Deleting the TODO didn't work... Report back the error.
         console.log(`Error deleting todo of ID ${id}`, error);
         return res.status(400).send(`Error deleting todo of ID ${id}`);
       }
-      //   Can't delete a TODO with bad ID. Report back the error.
     } else {
+      //   Can't delete a TODO with bad ID. Report back the error.
       console.log(
         `Error deleting todo of ID ${id}. Either NaN, or an invalid number (0 or negative)`
       );
