@@ -1,3 +1,11 @@
+function validator(condition, errorMessage) {
+  if (condition) {
+    return true;
+  } else {
+    throw new Error(errorMessage);
+  }
+}
+
 export default {
   /**
    * Checks if the ID is a number and above 0
@@ -5,7 +13,7 @@ export default {
    * @param {*} id - the ID of the todo
    */
   id(id) {
-    return isNaN(id) && id > 0;
+    validator(isNaN(id) && id > 0, "Is not a valid ID.")
   },
 
   /**
@@ -14,6 +22,6 @@ export default {
    * @param {*} rows
    */
   rows(rows) {
-    return Array.isArray(rows) && rows.length !== 0;
+    validator(Array.isArray(rows) && rows.length > 0, "No records were retrieved.")
   }
 };
