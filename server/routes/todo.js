@@ -1,18 +1,17 @@
 import db from "../db";
+import todo from "../services/todo";
 
 export default function(router) {
   /**
    * Returns all of the todos from the database.
    */
-  router.get("/todos", async (req, res) => {
-    const query = "SELECT * FROM todos";
 
+  router.get("/todos", async (req, res) => {
     try {
-      const result = await db.query(query);
-      res.status(200).json(result.rows);
-    } catch (error) {
-      console.log("Error returning all todos: ", error);
-      return res.status(400).send("Error getting all todos.");
+      const todos = await todo.fetchAll();
+      res.status(200).send(todos)
+    } catch(err) {
+      res.status(400).send(err);
     }
   });
 
@@ -22,30 +21,11 @@ export default function(router) {
   router.get(`/todos/:id`, async (req, res) => {
     const id = Number(req.params.id);
 
-    if (!isNaN(id) && id > 0) {
-      const query = "SELECT * FROM todos WHERE id = $1";
-
-      try {
-        const result = await db.query(query, [id]);
-        if (
-          Array.isArray(result.rows) &&
-          result.rows.length !== 0 &&
-          result.rows[0].id === id
-        ) {
-          res.status(200).json(result.rows);
-        } else {
-          throw `Todo with id ${id} does not exist`;
-        }
-      } catch (error) {
-        console.log(`Error returning todo of ID ${id}: `, error);
-        return res
-          .status(400)
-          .send(`Error returning todo of ID ${id}: ${error}`);
-      }
-    } else {
-      res
-        .status(400)
-        .send(`Error returning todo of ID ${id}. Either NaN or negative.`);
+    try {
+      const todo = await todo.findById(id);
+      res.status(200).send(todo)
+    } catch(err) {
+      res.status(400).send(err);
     }
   });
 
